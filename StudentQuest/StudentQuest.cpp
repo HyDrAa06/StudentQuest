@@ -1,7 +1,7 @@
 #include <iostream>
 
 void setStatsByDifficulty(const char* difficulty, int& knowledge, 
-    int& psyche, int& energy, int& luck, int& money)
+    int& psyche, int& energy, int& money)
 {
     if (!difficulty)
     {
@@ -26,7 +26,39 @@ void setStatsByDifficulty(const char* difficulty, int& knowledge,
     }
 }
 
+void study(const char* type, int& knowledge,
+    int& psyche, int& energy)
+{
+    if (!type)
+    {
+        return;
+    }
+    if (type == "Go to lectures")
+    {
+        knowledge += 20;
+        energy -= 20;
+        psyche -= 10;
+    }
+    else if (type == "Study home")
+    {
+        knowledge += 15;
+        energy -= 15;
+        psyche -= 20;
+    }
+    else if (type == "Study with friends")
+    {
+        knowledge += 5;
+        energy -= 10;
+        psyche += 10;
+    }
+    else 
+    {
+        return;
+    }
+}
+
 int main()
 {
-    
+    int knowledge, energy, money, psyche, luck, examNumber;
+    knowledge = energy = money = psyche = luck = 0;
 }

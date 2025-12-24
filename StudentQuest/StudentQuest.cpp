@@ -57,6 +57,38 @@ void study(const char* type, int& knowledge,
     }
 }
 
+void eating(int& psyche, int& money, int& energy)
+{
+    energy += 20;
+    money -= 10;
+    psyche += 5;
+}
+
+void goOut(int& psyche, int& money, int& energy)
+{
+    psyche += 40;
+    money -= 25;
+    energy -= 15;
+}
+
+void goToSleep(int& energy, int& psyche) 
+{
+    energy += 50;
+    psyche += 10;
+}
+
+void work(int& psyche, int& money, int& energy)
+{
+    money += 40;
+    energy -= 20;
+    psyche -= 10;
+}
+
+void takingAnExam(const int knowledge, int& energy)
+{
+    energy -= 20;
+}
+
 int main()
 {
     int knowledge, energy, money, psyche, luck, examNumber;

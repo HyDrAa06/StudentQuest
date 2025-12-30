@@ -1,5 +1,4 @@
 ﻿#include <iostream>
-#include <windows.h>
 
 void setStatsByDifficulty(const char* difficulty, int& knowledge, 
     int& psyche, int& energy, int& money)

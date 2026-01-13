@@ -86,9 +86,9 @@ void work(int& psyche, int& money, int& energy)
     psyche -= 10;
 }
 
-void takingAnExam(int& successfulExams, const int money, int& knowledge, int& energy, int& psyche, int luck, const int examNumber)
-{   
-    double penalty = (examNumber - 1) * 5;
+void takingAnExam(int& successfulExams, const int money, int& knowledge, int& energy, int& psyche, int luck)
+{                     //successfulExams + 1 - 1
+    double penalty = (successfulExams) * 5;
     double success = (knowledge * 0.75) + (psyche * 0.1)
         + (energy * 0.1) + (luck *0.2) - penalty;
     energy -= 20;
@@ -198,13 +198,18 @@ int main()
     int knowledge, energy, money, psyche, luck, examNumber, currentDay, successfulExams;
     knowledge = energy = money = psyche = luck = currentDay = successfulExams = 0;
 
+    int dayOfFourthExam = (rand() & 19) + 1;
+
     while (currentDay < 46)
     {
-        if (currentDay == 8)
-        {
+        
+        if (currentDay == 8 || currentDay == 17 || currentDay == 26
+            || currentDay == 26 + dayOfFourthExam || 45)
+        {       
             int luck = (rand() % 100) + 1;
-            takingAnExam(successfulExams, knowledge, energy,psyche,luck, 1);
+            takingAnExam(successfulExams, money, knowledge, energy,psyche,luck);
         }
+        
     }
 
     gameEnd(1, 0,0);

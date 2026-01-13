@@ -1,4 +1,6 @@
 ﻿#include <iostream>
+#include <cstdlib>
+
 
 void setStatsByDifficulty(const char* difficulty, int& knowledge, 
     int& psyche, int& energy, int& money)
@@ -84,15 +86,59 @@ void work(int& psyche, int& money, int& energy)
     psyche -= 10;
 }
 
-void takingAnExam(const int knowledge, int& energy)
-{
+void takingAnExam(int& successfulExams, const int money, int& knowledge, int& energy, int& psyche, int luck, const int examNumber)
+{   
+    double penalty = (examNumber - 1) * 5;
+    double success = (knowledge * 0.75) + (psyche * 0.1)
+        + (energy * 0.1) + (luck *0.2) - penalty;
     energy -= 20;
+
+    if (success >= 75)
+    {
+        successfulExams++;
+        psyche+=20;
+    }
+    else 
+    {
+        psyche -= 30;
+        gameEnd(money, psyche, successfulExams);
+    }
 }
 
 void faint(int& energy, int& currentDay)
 {
     currentDay++;
     energy = 40;
+}
+
+void getMoneyFromParents(int &money)
+{
+    money += 30;
+}
+void coffeeWithAFriend(int &psyche)
+{
+    psyche += 10;
+}
+void getIll(int& energy)
+{
+    energy -= 20;
+}
+
+void electricityCutdown(int& currentDay)
+{
+    currentDay++;
+}
+
+void randomEvent(const int random, int& money, int& psyche, int& energy, int& currentDay)
+{
+    if (random == 1)
+        getMoneyFromParents(money);
+    if (random == 2)
+        coffeeWithAFriend(psyche);
+    if (random == 3)
+        getIll(energy);
+    if (random == 4)
+        electricityCutdown(currentDay);
 }
 
 bool gameEnd(const int money, const int psyche, const int examsTaken)
@@ -146,9 +192,20 @@ void startNewGame(const int input)
 
 int main()
 {
-    
-    int knowledge, energy, money, psyche, luck, examNumber, currentDay;
-    knowledge = energy = money = psyche = luck = currentDay = 0;
+    srand(time(nullptr));
+    int randomNum = (rand() % 31) + 1;
+
+    int knowledge, energy, money, psyche, luck, examNumber, currentDay, successfulExams;
+    knowledge = energy = money = psyche = luck = currentDay = successfulExams = 0;
+
+    while (currentDay < 46)
+    {
+        if (currentDay == 8)
+        {
+            int luck = (rand() % 100) + 1;
+            takingAnExam(successfulExams, knowledge, energy,psyche,luck, 1);
+        }
+    }
 
     gameEnd(1, 0,0);
 }

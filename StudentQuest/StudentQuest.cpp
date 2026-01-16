@@ -182,7 +182,7 @@ void randomEvent(const int random, int& money, int& psyche, int& energy, int& cu
 
 void gameEnd(const int money, const int psyche, const int examsTaken)
 {
-    if (money == 0)
+    if (money <= 0)
     {
         std::cout << "╔══════════════════════════════════════╗\n";
         std::cout << "║ 💥 ИГРАТА ПРИКЛЮЧИ!                  ║\n";
@@ -192,7 +192,7 @@ void gameEnd(const int money, const int psyche, const int examsTaken)
         
         return;
     }
-    if (psyche == 0)
+    if (psyche <= 0)
     {
         std::cout << "╔══════════════════════════════════════╗\n"; 
         std::cout << "║ 💥 ИГРАТА ПРИКЛЮЧИ!                  ║\n"; 
@@ -308,7 +308,7 @@ int main()
                 int randomEventChance;
                 randomEventChance = rand() % 30+1;
 
-                if (randomEventChance % 1 == 0)
+                if (randomEventChance == 1)
                 {
                     std::cout << "!!!СЛУЧАЙНО СЪБИТИЕ!!!";
                     int randomEventType = rand() % 4 + 1;
@@ -323,24 +323,24 @@ int main()
                     std::cin >> action;
 
                     if (action == 1)
-                    {
-                        int typeOfLearning;
+                    {   
+                        bool completeAction = 0;
+                        do
+                        {
+                            int typeOfLearning;
 
-                        std::cout << "1. Лекции, 2. Вкъщи, 3. С приятели: \n";
-                        std::cin >> typeOfLearning;
+                            std::cout << "1. Лекции, 2. Вкъщи, 3. С приятели: \n";
+                            std::cin >> typeOfLearning;
 
-                        if (typeOfLearning == 1)
-                        {
-                            study(typeOfLearning, knowledge, psyche, energy);
-                        }
-                        if (typeOfLearning == 2)
-                        {
-                            study(typeOfLearning, knowledge, psyche, energy);
-                        }
-                        if (typeOfLearning == 3)
-                        {
-                            study(typeOfLearning, knowledge, psyche, energy);
-                        }
+                            if (typeOfLearning == 1 || typeOfLearning == 2 || typeOfLearning == 3)
+                            {
+                                study(typeOfLearning, knowledge, psyche, energy);
+                                completeAction = 1;
+                            }
+                            else std::cout << "Невалидна команда!";
+                        } 
+                        while (!completeAction);
+                        
                     }
                     else if (action == 2) eating(psyche, money, energy);
                     else if (action == 3) goOut(psyche, money, energy);
@@ -349,9 +349,14 @@ int main()
                     else std::cout << "Невалидна команда!\n";
                 } while (action < 1 || action > 5);
 
-            }
 
-            currentDay++;
+            }
+            if (money <= 0 || psyche <= 0)
+            {
+                gameOver = 1;
+            }
+            else currentDay++;
+
         }
         
     }

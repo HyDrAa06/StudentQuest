@@ -283,50 +283,78 @@ int main()
         std::cout << "Пари: " << money << "Енергия: " << energy << "Психика: " << psyche << "Знания" << knowledge
             << "\n";
 
-        if (currentDay == 8 || currentDay == 17 || currentDay == 26
-            || currentDay == 26 + dayOfFourthExam || currentDay == 45)
-        {       
-            std::cout << "ИЗПИТ \n";
-            int luck = (rand() % 100) + 1;
-            gameOver = takingAnExam(successfulExams, money, knowledge, energy,psyche,luck);
-            if (gameOver == 0)
-            {
-                std::cout << "ВЗЕ ИЗПИТА! \n";
-            }
+        if (energy <= 0)
+        {
+            std::cout << "!!!ПРИПАДНА ОТ УМОРА!!! \n";
+            faint(energy,currentDay,psyche);
         }
+
         else 
         {
-            int action = 0;
-
-            do
+            if (currentDay == 8 || currentDay == 17 || currentDay == 26
+                || currentDay == 26 + dayOfFourthExam || currentDay == 45)
             {
-                std::cout << "Моля изберете действие: \n 1. Учене \n 2. Хранене \n 3. Излизане \n 4. Сън \n 5. Работа \n Избор: ";
-                std::cin >> action;
-
-                if (action == 1)
+                std::cout << "ИЗПИТ \n";
+                int luck = (rand() % 100) + 1;
+                gameOver = takingAnExam(successfulExams, money, knowledge, energy, psyche, luck);
+                if (gameOver == 0)
                 {
-                    int typeOfLearning;
-
-                    std::cout << "1. Лекции, 2. Вкъщи, 3. С приятели: \n";
-                    std::cin >> typeOfLearning;
-
-                    if (typeOfLearning == 1)
-                    {
-                        study(typeOfLearning, knowledge, psyche, energy);
-                    }
+                    std::cout << "ВЗЕ ИЗПИТА! \n";
                 }
-                else if (action == 2) eating(psyche, money, energy);
-                else if (action == 3) goOut(psyche, money, energy);
-                else if (action == 4) goToSleep(energy, psyche);
-                else if (action == 5) work(psyche, money, energy);
-                else std::cout << "Невалидна команда!\n";
-            } 
-            while (action < 1 || action > 5);
+            }
+
+            else
+            {
+                int randomEventChance;
+                randomEventChance = rand() % 30+1;
+
+                if (randomEventChance % 1 == 0)
+                {
+                    std::cout << "!!!СЛУЧАЙНО СЪБИТИЕ!!!";
+                    int randomEventType = rand() % 4 + 1;
+                    randomEvent(randomEventType,money,psyche,energy,currentDay);
+                }
+
+                int action = 0;
+
+                do
+                {
+                    std::cout << "Моля изберете действие: \n 1. Учене \n 2. Хранене \n 3. Излизане \n 4. Сън \n 5. Работа \n Избор: ";
+                    std::cin >> action;
+
+                    if (action == 1)
+                    {
+                        int typeOfLearning;
+
+                        std::cout << "1. Лекции, 2. Вкъщи, 3. С приятели: \n";
+                        std::cin >> typeOfLearning;
+
+                        if (typeOfLearning == 1)
+                        {
+                            study(typeOfLearning, knowledge, psyche, energy);
+                        }
+                        if (typeOfLearning == 2)
+                        {
+                            study(typeOfLearning, knowledge, psyche, energy);
+                        }
+                        if (typeOfLearning == 3)
+                        {
+                            study(typeOfLearning, knowledge, psyche, energy);
+                        }
+                    }
+                    else if (action == 2) eating(psyche, money, energy);
+                    else if (action == 3) goOut(psyche, money, energy);
+                    else if (action == 4) goToSleep(energy, psyche);
+                    else if (action == 5) work(psyche, money, energy);
+                    else std::cout << "Невалидна команда!\n";
+                } while (action < 1 || action > 5);
+
+            }
 
             currentDay++;
         }
         
     }
 
-    gameEnd(1, 0,0);
+    gameEnd(money, psyche, successfulExams);
 }

@@ -23,17 +23,17 @@ void setStatsByDifficulty(const char* difficulty, int& knowledge,
         return;
     }
 
-    if (myStrcmp(difficulty, "easy"))
+    if (myStrcmp(difficulty, "easy")==0)
     {
         knowledge = 80;
         energy = money = psyche = 100;
     }
-    else if (myStrcmp(difficulty, "normal"))
+    else if (myStrcmp(difficulty, "normal")==0)
     {
         knowledge = 50;
         energy = money = psyche = 80;
     }
-    else if (myStrcmp(difficulty, "hard"))
+    else if (myStrcmp(difficulty, "hard")==0)
     {
         knowledge = 35;
         energy = money = 80;
@@ -120,7 +120,7 @@ void work(int& psyche, int& money, int& energy)
     psyche -= 10;
 }
 
-void takingAnExam(int& successfulExams, const int money, int& knowledge, int& energy, int& psyche, int luck)
+bool takingAnExam(int& successfulExams, const int money, int& knowledge, int& energy, int& psyche, int luck)
 {                     //successfulExams + 1 - 1
     double penalty = (successfulExams) * 5;
     double success = (knowledge * 0.75) + (psyche * 0.1)
@@ -130,12 +130,16 @@ void takingAnExam(int& successfulExams, const int money, int& knowledge, int& en
     if (success >= 75)
     {
         successfulExams++;
-        psyche+=20;
+        psyche += 20;
+        if(successfulExams==5)
+        return true;
+
+        return false;
     }
-    else 
+    else
     {
         psyche -= 30;
-        gameEnd(money, psyche, successfulExams);
+        return true;
     }
 }
 
@@ -176,7 +180,7 @@ void randomEvent(const int random, int& money, int& psyche, int& energy, int& cu
         electricityCutdown(currentDay);
 }
 
-bool gameEnd(const int money, const int psyche, const int examsTaken)
+void gameEnd(const int money, const int psyche, const int examsTaken)
 {
     if (money == 0)
     {
@@ -186,7 +190,7 @@ bool gameEnd(const int money, const int psyche, const int examsTaken)
         std::cout << "║ Остана без пари и умря от глад       ║\n";
         std::cout << "╚══════════════════════════════════════╝\n";         
         
-        return 1;
+        return;
     }
     if (psyche == 0)
     {
@@ -197,7 +201,7 @@ bool gameEnd(const int money, const int psyche, const int examsTaken)
         std::cout << "║ и си напуснал университета           ║\n"; 
         std::cout << "╚══════════════════════════════════════╝\n"; 
 
-        return 1;
+        return;
     }
     if (examsTaken == 5)
     {
@@ -208,9 +212,18 @@ bool gameEnd(const int money, const int psyche, const int examsTaken)
         std::cout << "║ в сесията на живота си!              ║\n";
         std::cout << "╚══════════════════════════════════════╝\n"; 
 
-        return 1;
+        return;
     }
-    return 0;
+    if (examsTaken != 5)
+    {
+        std::cout << "╔══════════════════════════════════════╗\n";
+        std::cout << "║ 💥 ИГРАТА ПРИКЛЮЧИ!                  ║\n";
+        std::cout << "║                                      ║\n";
+        std::cout << "║ Не успя да вземеш всички             ║\n";
+        std::cout << "║ изпити!                              ║\n";
+        std::cout << "╚══════════════════════════════════════╝\n";
+    }
+    return;
 }
 
 void startNewGame(const int input)
@@ -233,7 +246,6 @@ int main()
     int knowledge, energy, money, psyche, luck, examNumber, currentDay, successfulExams;
     knowledge = energy = money = psyche = luck = currentDay = successfulExams = 0;
 
-    int dayOfFourthExam = (rand() & 19) + 1;
     int difficulty;
 
     do 
@@ -259,17 +271,28 @@ int main()
 
         }
     } 
-    while (difficulty != 1 || difficulty != 2 || difficulty != 3);
+    while (difficulty != 1 && difficulty != 2 && difficulty != 3);
     
+    int dayOfFourthExam = (rand() % 19) + 1;
 
-    while (currentDay < 46)
+    bool gameOver = 0;
+
+    while (currentDay < 46 && !gameOver)
     {
-        
+        std::cout << "--- ДЕН " << currentDay << " ---\n";
+        std::cout << "Пари: " << money << "Енергия: " << energy << "Психика: " << psyche << "Знания" << knowledge
+            << "\n";
+
         if (currentDay == 8 || currentDay == 17 || currentDay == 26
-            || currentDay == 26 + dayOfFourthExam || 45)
+            || currentDay == 26 + dayOfFourthExam || currentDay == 45)
         {       
+            std::cout << "ИЗПИТ \n";
             int luck = (rand() % 100) + 1;
-            takingAnExam(successfulExams, money, knowledge, energy,psyche,luck);
+            gameOver = takingAnExam(successfulExams, money, knowledge, energy,psyche,luck);
+            if (gameOver == 0)
+            {
+                std::cout << "ВЗЕ ИЗПИТА! \n";
+            }
         }
         else 
         {
@@ -299,6 +322,8 @@ int main()
                 else std::cout << "Невалидна команда!\n";
             } 
             while (action < 1 || action > 5);
+
+            currentDay++;
         }
         
     }

@@ -1,6 +1,19 @@
 ﻿#include <iostream>
 #include <cstdlib>
 
+int myStrcmp(const char* str1, const char* str2)
+{
+    if (!str1 || !str2)
+        return 0;
+
+    while (*str1 && *str2 && *str1 == *str2)
+    {
+        str1++;
+        str2++;
+    }
+
+    return *str1 - *str2;
+}
 
 void setStatsByDifficulty(const char* difficulty, int& knowledge, 
     int& psyche, int& energy, int& money)
@@ -10,17 +23,17 @@ void setStatsByDifficulty(const char* difficulty, int& knowledge,
         return;
     }
 
-    if (difficulty == "easy")
+    if (myStrcmp(difficulty, "easy"))
     {
         knowledge = 80;
         energy = money = psyche = 100;
     }
-    else if (difficulty == "normal")
+    else if (myStrcmp(difficulty, "normal"))
     {
         knowledge = 50;
         energy = money = psyche = 80;
     }
-    else if (difficulty == "hard")
+    else if (myStrcmp(difficulty, "hard"))
     {
         knowledge = 35;
         energy = money = 80;
@@ -28,28 +41,32 @@ void setStatsByDifficulty(const char* difficulty, int& knowledge,
     }
 }
 
-void study(const char* type, int& knowledge,
+void study(int type, int& knowledge,
     int& psyche, int& energy)
 {
-    if (!type)
+    if (type > 3 || type < 1)
     {
         return;
     }
-    if (type == "Go to lectures")
+
+    int knowledgeGain = 0;
+    int startEnergy = energy;
+
+    if (type == 1)
     {
-        knowledge += 20;
+        knowledgeGain += 20;
         energy -= 20;
         psyche -= 10;
     }
-    else if (type == "Study home")
+    else if (type == 2)
     {
-        knowledge += 15;
+        knowledgeGain += 15;
         energy -= 15;
         psyche -= 20;
     }
-    else if (type == "Study with friends")
+    else if (type == 3)
     {
-        knowledge += 5;
+        knowledgeGain += 5;
         energy -= 10;
         psyche += 10;
     }
@@ -57,11 +74,25 @@ void study(const char* type, int& knowledge,
     {
         return;
     }
+
+    if (startEnergy < 80 && startEnergy >= 40)
+    {
+        knowledgeGain = knowledgeGain * 0.75;
+    }
+    else if (startEnergy < 40 && startEnergy > 0)
+    {
+        knowledgeGain = knowledgeGain * 0.5;
+    }
+
+    knowledge += knowledgeGain;
 }
 
 void eating(int& psyche, int& money, int& energy)
 {
-    energy += 20;
+    if (energy + 20 > 100)
+        energy = 100;
+    else
+        energy += 20;
     money -= 10;
     psyche += 5;
 }
@@ -75,7 +106,10 @@ void goOut(int& psyche, int& money, int& energy)
 
 void goToSleep(int& energy, int& psyche) 
 {
-    energy += 50;
+    if (energy + 50 > 100)
+        energy = 100;
+    else
+        energy += 50;
     psyche += 10;
 }
 
@@ -105,10 +139,11 @@ void takingAnExam(int& successfulExams, const int money, int& knowledge, int& en
     }
 }
 
-void faint(int& energy, int& currentDay)
+void faint(int& energy, int& currentDay, int& psyche)
 {
     currentDay++;
     energy = 40;
+    psyche -= 10;
 }
 
 void getMoneyFromParents(int &money)
@@ -199,6 +234,33 @@ int main()
     knowledge = energy = money = psyche = luck = currentDay = successfulExams = 0;
 
     int dayOfFourthExam = (rand() & 19) + 1;
+    int difficulty;
+
+    do 
+    {
+        std::cout << "Изберете трудност (1-Easy, 2-Normal, 3-Hard)\n";
+        std::cin >> difficulty;
+
+        if (difficulty == 1)
+        {
+            setStatsByDifficulty("easy", knowledge, psyche, energy, money);
+        }
+        else if (difficulty == 2)
+        {
+            setStatsByDifficulty("normal", knowledge, psyche, energy, money);
+        }
+        else if (difficulty == 3)
+        {
+            setStatsByDifficulty("hard", knowledge, psyche, energy, money);
+        }
+        else
+        {
+            std::cout << "Невалидна команда!\n";
+
+        }
+    } 
+    while (difficulty != 1 || difficulty != 2 || difficulty != 3);
+    
 
     while (currentDay < 46)
     {
@@ -208,6 +270,35 @@ int main()
         {       
             int luck = (rand() % 100) + 1;
             takingAnExam(successfulExams, money, knowledge, energy,psyche,luck);
+        }
+        else 
+        {
+            int action = 0;
+
+            do
+            {
+                std::cout << "Моля изберете действие: \n 1. Учене \n 2. Хранене \n 3. Излизане \n 4. Сън \n 5. Работа \n Избор: ";
+                std::cin >> action;
+
+                if (action == 1)
+                {
+                    int typeOfLearning;
+
+                    std::cout << "1. Лекции, 2. Вкъщи, 3. С приятели: \n";
+                    std::cin >> typeOfLearning;
+
+                    if (typeOfLearning == 1)
+                    {
+                        study(typeOfLearning, knowledge, psyche, energy);
+                    }
+                }
+                else if (action == 2) eating(psyche, money, energy);
+                else if (action == 3) goOut(psyche, money, energy);
+                else if (action == 4) goToSleep(energy, psyche);
+                else if (action == 5) work(psyche, money, energy);
+                else std::cout << "Невалидна команда!\n";
+            } 
+            while (action < 1 || action > 5);
         }
         
     }

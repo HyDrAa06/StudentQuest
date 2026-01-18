@@ -3,6 +3,9 @@
 #include <windows.h>
 #include <fstream>
 
+//github link:
+//https://github.com/HyDrAa06/StudentQuest
+
 unsigned charToDigit(char ch)
 {
     return ch - '0';

@@ -187,6 +187,7 @@ void randomEvent(const int random, int& money, int& psyche, int& energy, int& cu
 
 void gameEnd(const int money, const int psyche, const int examsTaken)
 {
+
     if (money <= 0)
     {
         std::cout << "|--------------------------------------|\n";
@@ -274,7 +275,7 @@ int main()
         }
         else
         {
-            std::cout << "Невалидна команда!\n";
+            std::cout << "Invalid command!\n";
 
         }
     } 
@@ -283,6 +284,7 @@ int main()
     int dayOfFourthExam = (rand() % 19) + 1;
 
     bool gameOver = 0;
+    bool earlyExit = 0;
 
     while (currentDay < 46 && !gameOver)
     {
@@ -331,7 +333,7 @@ int main()
 
                 do
                 {
-                    std::cout << "Please slect an action: \n 1. Study \n 2. Eat \n 3. Go out \n 4. Sleep \n 5. Work \n Choice: ";
+                    std::cout << "Please slect an action: \n 1. Study \n 2. Eat \n 3. Go out \n 4. Sleep \n 5. Work \n 6. Exit \n Choice: ";
                     std::cin >> action;
 
                     if (action == 1)
@@ -354,12 +356,85 @@ int main()
                         while (!completeAction);
                         
                     }
-                    else if (action == 2) eating(psyche, money, energy);
-                    else if (action == 3) goOut(psyche, money, energy);
-                    else if (action == 4) goToSleep(energy, psyche);
-                    else if (action == 5) work(psyche, money, energy);
+                    else if (action == 2)
+                    {
+                        eating(psyche, money, energy);
+                        int randomPoison = (rand() % 20) + 1;
+                        if (randomPoison == 1)
+                        {
+                            std::cout << "You got food poisoning!";
+                            energy -= 30;
+                            psyche -= 15;
+                        }
+                    }
+                    else if (action == 3)
+                    {
+                        goOut(psyche, money, energy);
+                        int randomRob = (rand() % 20) + 1;
+                        if (randomRob == 1)
+                        {
+                            std::cout << "You got robbed!";
+                            energy -= 10;
+                            psyche -= 25;
+                            if (money > 30)
+                            {
+                                money = 10;
+                            }
+                            else
+                            {
+                                std::cout << "The robber laughed at you!";
+                                psyche -= 15;
+                                money--;
+                            }
+                        }
+                    }
+                    else if (action == 4)
+                    {
+                        goToSleep(energy, psyche);
+                        int randomSleepParalysis = (rand() % 20) + 1;
+                        if (randomSleepParalysis == 1)
+                        {
+                            std::cout << "You got sleep paralysis!";
+                            energy -= 10;
+                            psyche -= 30;
+                        }
+                    }
+                    else if (action == 5) 
+                    {
+                        work(psyche, money, energy); 
+                        int randomBoss = (rand() % 20) + 1;
+                        if (randomBoss == 1)
+                        {
+                            std::cout << "Your boss is in a bad mood!";
+                            money - 10;
+                            psyche - 10;
+                        }
+                    }
+                    else if (action == 6)
+                    {
+                        std::cout << "Are you sure? (1. Yes | 2. No)\n";
+                        int exitCommand;
+                        do
+                        {
+                            std::cin >> exitCommand;
+                            if (exitCommand == 1)
+                            {
+                                earlyExit = 1;
+                                gameOver = 1;
+                                std::cout << "|--------------------------------------|\n";
+                                std::cout << "| !GAME OVER!                          |\n";
+                                std::cout << "|                                      |\n";
+                                std::cout << "| Thank you for playing!               |\n";
+                                std::cout << "|--------------------------------------|\n";
+                            }
+                            else if (exitCommand == 2) currentDay--;
+                            else std::cout << "Invalid command!\n";
+
+                        }
+                        while (exitCommand != 1 && exitCommand != 2);
+                    }
                     else std::cout << "Invalid command!\n";
-                } while (action < 1 || action > 5);
+                } while (action < 1 || action > 6);
 
 
             }
@@ -388,6 +463,10 @@ int main()
         }
         
     }
-
+    if(earlyExit != 1)
     gameEnd(money, psyche, successfulExams);
+    else 
+    {
+        earlyExit = 0;
+    }
 }

@@ -1,6 +1,7 @@
 ﻿#include <cstdlib>
 #include <iostream>
 #include <windows.h>
+#include <fstream>
 
 int myStrcmp(const char* str1, const char* str2)
 {
@@ -37,10 +38,11 @@ void setStatsByDifficulty(const char* difficulty, int& knowledge,
     else if (myStrcmp(difficulty, "hard")==0)
     {
         knowledge = 35;
-        energy = money = 80;
+        energy = money = 60;
         psyche = 40;
     }
 }
+
 
 void study(int type, int& knowledge,
     int& psyche, int& energy)
@@ -100,7 +102,16 @@ void eating(int& psyche, int& money, int& energy)
 
 void goOut(int& psyche, int& money, int& energy)
 {
-    psyche += 40;
+    int psycheGain = 40;
+    if (energy < 80 && energy >= 40)
+    {
+        psycheGain = psycheGain * 0.75;
+    }
+    else if (energy > 0 && energy < 40)
+    {
+        psycheGain = psycheGain * 0.5;
+    }
+    psyche += psycheGain;
     money -= 25;
     energy -= 15;
 }
@@ -116,7 +127,16 @@ void goToSleep(int& energy, int& psyche)
 
 void work(int& psyche, int& money, int& energy)
 {
-    money += 40;
+    int moneyGain = 40;
+    if (energy < 80 && energy >= 40)
+    {
+        moneyGain = moneyGain * 0.75;
+    }
+    else if (energy > 0 && energy < 40)
+    {
+        moneyGain = moneyGain * 0.5;
+    }
+    money += moneyGain;
     energy -= 20;
     psyche -= 10;
 }
@@ -187,62 +207,89 @@ void randomEvent(const int random, int& money, int& psyche, int& energy, int& cu
 
 void gameEnd(const int money, const int psyche, const int examsTaken)
 {
-
-    if (money <= 0)
-    {
-        std::cout << "|--------------------------------------|\n";
-        std::cout << "| !GAME OVER!                          |\n";
-        std::cout << "|                                      |\n";
-        std::cout << "| You ran out of money and died        |\n";
-        std::cout << "| of hunger!                           |\n";
-        std::cout << "|--------------------------------------|\n";
-
-        return;
+    if (money <= 0) {
+        std::cout << "\n+--------------------------------------+\n";
+        std::cout << "|             !GAME OVER!              |\n";
+        std::cout << "|     You ran out of money and died    |\n";
+        std::cout << "|             of hunger!               |\n";
+        std::cout << "+--------------------------------------+\n";
     }
-    if (psyche <= 0)
-    {
-        std::cout << "|--------------------------------------|\n";
-        std::cout << "| !GAME OVER!                          |\n";
-        std::cout << "|                                      |\n";
-        std::cout << "| Your psyche couldn't handle          |\n"; 
-        std::cout << "| it and you left the university!      |\n"; 
-        std::cout << "|--------------------------------------|\n";
-
-        return;
+    else if (psyche <= 0) {
+        std::cout << "\n+--------------------------------------+\n";
+        std::cout << "|             !GAME OVER!              |\n";
+        std::cout << "|    Your psyche couldn't handle it    |\n";
+        std::cout << "|    and you left the university!      |\n";
+        std::cout << "+--------------------------------------+\n";
     }
-    if (examsTaken == 5)
-    {
-        std::cout << "|--------------------------------------|\n";
-        std::cout << "| !CONGRATULATIONS!                    |\n";
-        std::cout << "|                                      |\n";
-        std::cout << "| You took all the exams and           |\n";
-        std::cout << "| survived the session of your life!   |\n";
-        std::cout << "|--------------------------------------|\n";
-
-        return;
+    else if (examsTaken == 5) {
+        std::cout << "\n+--------------------------------------+\n";
+        std::cout << "|          !CONGRATULATIONS!           |\n";
+        std::cout << "|      You took all the exams and      |\n";
+        std::cout << "|  survived the session of your life!  |\n";
+        std::cout << "+--------------------------------------+\n";
     }
-    if (examsTaken != 5)
-    {
-        std::cout << "|--------------------------------------|\n";
-        std::cout << "| !GAME OVER!                          |\n";
-        std::cout << "|                                      |\n";
-        std::cout << "| You failed to pass all the exams!    |\n";
-        std::cout << "| Better luck next summer/year!        |\n";
-        std::cout << "|--------------------------------------|\n";
+    else {
+        std::cout << "\n+--------------------------------------+\n";
+        std::cout << "|             !GAME OVER!              |\n";
+        std::cout << "|   You failed to pass all the exams!  |\n";
+        std::cout << "|     Better luck next summer/year!    |\n";
+        std::cout << "+--------------------------------------+\n";
     }
-    return;
 }
 
-void startNewGame(const int input)
+void saveGame(int knowledge, int energy, int money, int psyche, int currentDay, int successfulExams, int dayOfFourthExam)
 {
-    if (input == 1)
-    {
+    std::ofstream file("savegame.txt");
 
-    }
-    else 
+    if (!file.is_open())
     {
-
+        std::cout << "Could not open file for saving!\n";
+        return;
     }
+
+    file << knowledge << std::endl;
+    file << energy << std::endl;
+    file << money << std::endl;
+    file << psyche << std::endl;
+    file << currentDay << std::endl;
+    file << successfulExams << std::endl;
+    file << dayOfFourthExam << std::endl;
+
+    file.close();
+}
+
+bool loadGame(int& knowledge, int& energy, int& money, int& psyche, int& currentDay, int& successfulExams, int& dayOfFourthExam)
+{
+    std::ifstream file("savegame.txt");
+
+    if (!file.is_open())
+    {
+        std::cout << "Could not open file for loading!\n";
+        return false;
+    }
+
+    if (file >> knowledge >> energy >> money >> psyche >> currentDay >> successfulExams >> dayOfFourthExam)
+    {
+        file.close();
+        if (currentDay < 1) return false;
+        return true;
+    }
+
+    file.close();
+    return false;
+}
+
+void drawStats(int day, int money, int energy, int psyche, int knowledge, int exams) {
+    std::cout << "\n";
+    std::cout << "+-----------------------------+\n";
+    std::cout << "| Day: " << day << " / 45                 |\n";
+    std::cout << "+-----------------------------+\n";
+    std::cout << "| Money:     " << money << "               |\n";
+    std::cout << "| Energy:    " << energy << "               |\n";
+    std::cout << "| Psyche:    " << psyche << "               |\n";
+    std::cout << "| Knowledge: " << knowledge << "               |\n";
+    std::cout << "| Exams:     " << exams << " / 5            |\n";
+    std::cout << "+-----------------------------+\n";
 }
 
 int main()
@@ -250,44 +297,72 @@ int main()
     srand(time(nullptr));
     int randomNum = (rand() % 31) + 1;
 
-    int knowledge, energy, money, psyche, luck, examNumber, currentDay, successfulExams;
-    knowledge = energy = money = psyche = luck  = successfulExams = 0;
+    int knowledge, energy, money, psyche, luck, examNumber, currentDay, successfulExams, dayOfFourthExam;
+    knowledge = energy = money = psyche = luck  = successfulExams = dayOfFourthExam = 0;
     currentDay = 1;
 
-    int difficulty;
+    bool gameLoad = false;
+    
+    int startChoice;
+    std::cout << "+--------------------------+\n";
+    std::cout << "|!WELCOME TO STUDENT QUEST!|\n";
+    std::cout << "+--------------------------+\n\n";
+    std::cout << "1. New Game\n";
+    std::cout << "2. Load Game\n";
+    std::cin >> startChoice;
 
-    do 
+    if (startChoice == 2)
     {
-        std::cout << "Select difficulty (1-Easy, 2-Normal, 3-Hard)\n";
-        std::cin >> difficulty;
-
-        if (difficulty == 1)
+        if (loadGame(knowledge, energy, money, psyche, currentDay, successfulExams, dayOfFourthExam))
         {
-            setStatsByDifficulty("easy", knowledge, psyche, energy, money);
-        }
-        else if (difficulty == 2)
-        {
-            setStatsByDifficulty("normal", knowledge, psyche, energy, money);
-        }
-        else if (difficulty == 3)
-        {
-            setStatsByDifficulty("hard", knowledge, psyche, energy, money);
+            std::cout << "Save file found! Loading...\n\n";
+            gameLoad = true;
         }
         else
         {
-            std::cout << "Invalid command!\n";
-
+            std::cout << "No save file found. Starting new game.\n\n";
+            gameLoad = false;
         }
-    } 
-    while (difficulty != 1 && difficulty != 2 && difficulty != 3);
-    
-    int dayOfFourthExam = (rand() % 19) + 1;
+    }
+
+    if (!gameLoad)
+    {
+        int difficulty;
+
+        do
+        {
+            std::cout << "Select difficulty (1-Easy, 2-Normal, 3-Hard)\n";
+            std::cin >> difficulty;
+
+            if (difficulty == 1)
+            {
+                setStatsByDifficulty("easy", knowledge, psyche, energy, money);
+            }
+            else if (difficulty == 2)
+            {
+                setStatsByDifficulty("normal", knowledge, psyche, energy, money);
+            }
+            else if (difficulty == 3)
+            {
+                setStatsByDifficulty("hard", knowledge, psyche, energy, money);
+            }
+            else
+            {
+                std::cout << "Invalid command!\n";
+
+            }
+        } while (difficulty != 1 && difficulty != 2 && difficulty != 3);
+
+        dayOfFourthExam = (rand() % 18) + 1;
+    }
 
     bool gameOver = 0;
     bool earlyExit = 0;
 
     while (currentDay < 46 && !gameOver)
     {
+        saveGame(knowledge, energy, money, psyche, currentDay, successfulExams, dayOfFourthExam);
+
         int randomEventChance;
         randomEventChance = rand() % 30 + 1;
 
@@ -298,13 +373,11 @@ int main()
             randomEvent(randomEventType, money, psyche, energy, currentDay);
         }
 
-        std::cout << "--- DAY " << currentDay << " ---\n";
-        std::cout << "Money: " << money << " Energy: " << energy << " Psyche: " << psyche << " Knowledge:" << knowledge
-            << "\n";
+        drawStats(currentDay, money, energy, psyche, knowledge, successfulExams);
 
         if (energy <= 0)
         {
-            std::cout << "!!!FAINTED FROM FATIGUE!!! \n";
+            std::cout << "!!!FAINTED FROM FATIGUE (Day skipped) !!! \n";
             faint(energy,currentDay,psyche);
         }
 
@@ -314,12 +387,12 @@ int main()
                 || currentDay == 26 + dayOfFourthExam || currentDay == 45)
             {
                 
-                std::cout << "\n !EXAM! \n";
+                std::cout << "\n |----- EXAM DAY! -----| \n";
                 int luck = (rand() % 100) + 1;
                 gameOver = takingAnExam(successfulExams, money, knowledge, energy, psyche, luck);
                 if (gameOver == 0)
                 {
-                    std::cout << "YOU PASSED! \n\n";
+                    std::cout << ">>> EXAM PASSED! Knowledge decreased. <<<\n";
                     int randomKnowldegeLoss = (rand() % knowledge) + 1;
                     knowledge -= randomKnowldegeLoss;
                 }
@@ -327,8 +400,6 @@ int main()
 
             else
             {
-                
-
                 int action = 0;
 
                 do
@@ -359,7 +430,7 @@ int main()
                     else if (action == 2)
                     {
                         eating(psyche, money, energy);
-                        int randomPoison = (rand() % 20) + 1;
+                        int randomPoison = (rand() % 25) + 1;
                         if (randomPoison == 1)
                         {
                             std::cout << "You got food poisoning!";
@@ -391,7 +462,7 @@ int main()
                     else if (action == 4)
                     {
                         goToSleep(energy, psyche);
-                        int randomSleepParalysis = (rand() % 20) + 1;
+                        int randomSleepParalysis = (rand() % 30) + 1;
                         if (randomSleepParalysis == 1)
                         {
                             std::cout << "You got sleep paralysis!";
@@ -406,8 +477,8 @@ int main()
                         if (randomBoss == 1)
                         {
                             std::cout << "Your boss is in a bad mood!";
-                            money - 10;
-                            psyche - 10;
+                            money -= 10;
+                            psyche -= 10;
                         }
                     }
                     else if (action == 6)
@@ -419,6 +490,7 @@ int main()
                             std::cin >> exitCommand;
                             if (exitCommand == 1)
                             {
+                                saveGame(knowledge, energy, money, psyche, currentDay, successfulExams, dayOfFourthExam);
                                 earlyExit = 1;
                                 gameOver = 1;
                                 std::cout << "|--------------------------------------|\n";
@@ -458,10 +530,10 @@ int main()
             }
 
 
-            else currentDay++;
 
         }
-        
+        currentDay++;
+
     }
     if(earlyExit != 1)
     gameEnd(money, psyche, successfulExams);

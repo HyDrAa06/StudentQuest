@@ -3,6 +3,62 @@
 #include <windows.h>
 #include <fstream>
 
+unsigned charToDigit(char ch)
+{
+    return ch - '0';
+}
+
+bool isDigit(char ch)
+{
+    return ch >= '0' && ch <= '9';
+}
+
+bool isValidNumber(const char* str)
+{
+    if (!str || !*str)
+        return false; 
+
+    if (*str == '-')
+        str++;
+
+    if (!*str)
+        return false; 
+
+    while (*str)
+    {
+        if (!isDigit(*str))
+            return false;
+        str++;
+    }
+    return true;
+}
+
+unsigned stringToNumber(const char* str)
+{
+    unsigned result = 0;
+
+    while (*str)
+    {
+        if (isDigit(*str)) 
+        {
+            int digit = charToDigit(*str);
+            (result *= 10) += digit;
+        }
+        str++;
+    }
+    return result;
+}
+
+int myAtoi(const char* str)
+{
+    if (!str)
+        return 0;
+    if (*str == '-')
+        return -1 * stringToNumber(str + 1);
+
+    return stringToNumber(str);
+}
+
 int myStrcmp(const char* str1, const char* str2)
 {
     if (!str1 || !str2)
@@ -292,6 +348,8 @@ void drawStats(int day, int money, int energy, int psyche, int knowledge, int ex
     std::cout << "+-----------------------------+\n";
 }
 
+const size_t LENGTH = 50;
+
 int main()
 {
     srand(time(nullptr));
@@ -304,12 +362,29 @@ int main()
     bool gameLoad = false;
     
     int startChoice;
+    char input[LENGTH];
+
     std::cout << "+--------------------------+\n";
     std::cout << "|!WELCOME TO STUDENT QUEST!|\n";
     std::cout << "+--------------------------+\n\n";
     std::cout << "1. New Game\n";
     std::cout << "2. Load Game\n";
-    std::cin >> startChoice;
+
+    do {
+        std::cin >> input; 
+
+        if (isValidNumber(input)) {
+            startChoice = myAtoi(input);
+            if (startChoice < 1 || startChoice > 2) {
+                std::cout << "Please enter 1 or 2!\n";
+                startChoice = 0;
+            }
+        }
+        else {
+            std::cout << "Invalid input! Please enter a number.\n";
+            startChoice = 0;
+        }
+    } while (startChoice == 0);
 
     if (startChoice == 2)
     {
@@ -332,9 +407,21 @@ int main()
         do
         {
             std::cout << "Select difficulty (1-Easy, 2-Normal, 3-Hard)\n";
-            std::cin >> difficulty;
 
-            if (difficulty == 1)
+            std::cin >> input;
+
+            if (isValidNumber(input)) {
+                difficulty = myAtoi(input);
+                if (difficulty < 1 || difficulty > 3) {
+                    std::cout << "Please enter 1, 2 or 3!\n";
+                    difficulty = 0;
+                }
+            }
+            else {
+                std::cout << "Invalid input! Numbers only.\n";
+                difficulty = 0;
+            }
+            if (difficulty == 1)   
             {
                 setStatsByDifficulty("easy", knowledge, psyche, energy, money);
             }
@@ -345,11 +432,6 @@ int main()
             else if (difficulty == 3)
             {
                 setStatsByDifficulty("hard", knowledge, psyche, energy, money);
-            }
-            else
-            {
-                std::cout << "Invalid command!\n";
-
             }
         } while (difficulty != 1 && difficulty != 2 && difficulty != 3);
 
@@ -404,28 +486,43 @@ int main()
 
                 do
                 {
-                    std::cout << "Please slect an action: \n 1. Study \n 2. Eat \n 3. Go out \n 4. Sleep \n 5. Work \n 6. Exit \n Choice: ";
-                    std::cin >> action;
+                    do {
+                        std::cout << "\nChoose action:\n1. Study\n2. Eat\n3. Go out\n4. Sleep\n5. Work\n6. Save & Exit\nChoice: ";
+                        std::cin >> input; 
+
+                        if (isValidNumber(input)) {
+                            action = myAtoi(input);
+                            if (action < 1 || action > 6) {
+                                std::cout << "Invalid number! Choose 1-6.\n";
+                                action = 0;
+                            }
+                        }
+                        else {
+                            std::cout << "Invalid input! Numbers only.\n";
+                            action = 0;
+                        }
+                    } while (action == 0);
 
                     if (action == 1)
                     {   
-                        bool completeAction = 0;
-                        do
-                        {
-                            int typeOfLearning;
+                            int typeOfLearning=0;
 
-                            std::cout << "1. Lectures, 2. Home, 3. With friends: \n";
-                            std::cin >> typeOfLearning;
-
-                            if (typeOfLearning == 1 || typeOfLearning == 2 || typeOfLearning == 3)
+                            do 
                             {
-                                study(typeOfLearning, knowledge, psyche, energy);
-                                completeAction = 1;
-                            }
-                            else std::cout << "Invalid command!";
-                        } 
-                        while (!completeAction);
-                        
+                                std::cout << "  1. Lectures, 2. Home, 3. With friends: ";
+                                std::cin >> input;
+                                if (isValidNumber(input))
+                                {
+                                    typeOfLearning = myAtoi(input);
+                                    if (typeOfLearning == 1 || typeOfLearning == 2 || typeOfLearning == 3)
+                                    {
+                                        study(typeOfLearning, knowledge, psyche, energy);
+                                    }
+                                    else std::cout << "Invalid command!\n";
+
+                                }
+                              
+                            } while (typeOfLearning < 1 || typeOfLearning > 3);
                     }
                     else if (action == 2)
                     {
@@ -433,7 +530,7 @@ int main()
                         int randomPoison = (rand() % 25) + 1;
                         if (randomPoison == 1)
                         {
-                            std::cout << "You got food poisoning!";
+                            std::cout << "You got food poisoning!\n";
                             energy -= 30;
                             psyche -= 15;
                         }
@@ -444,7 +541,7 @@ int main()
                         int randomRob = (rand() % 20) + 1;
                         if (randomRob == 1)
                         {
-                            std::cout << "You got robbed!";
+                            std::cout << "You got robbed!\n";
                             energy -= 10;
                             psyche -= 25;
                             if (money > 30)
@@ -453,7 +550,7 @@ int main()
                             }
                             else
                             {
-                                std::cout << "The robber laughed at you!";
+                                std::cout << "The robber laughed at you!\n";
                                 psyche -= 15;
                                 money--;
                             }
@@ -465,7 +562,7 @@ int main()
                         int randomSleepParalysis = (rand() % 30) + 1;
                         if (randomSleepParalysis == 1)
                         {
-                            std::cout << "You got sleep paralysis!";
+                            std::cout << "You got sleep paralysis!\n";
                             energy -= 10;
                             psyche -= 30;
                         }
@@ -483,25 +580,29 @@ int main()
                     }
                     else if (action == 6)
                     {
-                        std::cout << "Are you sure? (1. Yes | 2. No)\n";
-                        int exitCommand;
+                        int exitCommand=0;
                         do
                         {
-                            std::cin >> exitCommand;
-                            if (exitCommand == 1)
-                            {
-                                saveGame(knowledge, energy, money, psyche, currentDay, successfulExams, dayOfFourthExam);
-                                earlyExit = 1;
-                                gameOver = 1;
-                                std::cout << "|--------------------------------------|\n";
-                                std::cout << "| !GAME OVER!                          |\n";
-                                std::cout << "|                                      |\n";
-                                std::cout << "| Thank you for playing!               |\n";
-                                std::cout << "|--------------------------------------|\n";
-                            }
-                            else if (exitCommand == 2) currentDay--;
-                            else std::cout << "Invalid command!\n";
+                            std::cout << "Are you sure? (1. Yes | 2. No)\n";
 
+                            std::cin >> input;
+                            if (isValidNumber(input))
+                            {
+                                exitCommand = myAtoi(input);
+                                if (exitCommand == 1)
+                                {
+                                    saveGame(knowledge, energy, money, psyche, currentDay, successfulExams, dayOfFourthExam);
+                                    earlyExit = 1;
+                                    gameOver = 1;
+                                    std::cout << "|--------------------------------------|\n";
+                                    std::cout << "| !GAME OVER!                          |\n";
+                                    std::cout << "|                                      |\n";
+                                    std::cout << "| Thank you for playing!               |\n";
+                                    std::cout << "|--------------------------------------|\n";
+                                }
+                                else if (exitCommand == 2) currentDay--;
+                            }
+                            else std::cout << "Invalid command!\n";
                         }
                         while (exitCommand != 1 && exitCommand != 2);
                     }

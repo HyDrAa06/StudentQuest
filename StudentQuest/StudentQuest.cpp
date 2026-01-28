@@ -266,7 +266,14 @@ void randomEvent(const int random, int& money, int& psyche, int& energy, int& cu
 
 void gameEnd(const int money, const int psyche, const int examsTaken)
 {
-	if (money <= 0) {
+	if (examsTaken == 5) {
+		std::cout << "\n+--------------------------------------+\n";
+		std::cout << "|          !CONGRATULATIONS!           |\n";
+		std::cout << "|      You took all the exams and      |\n";
+		std::cout << "|  survived the session of your life!  |\n";
+		std::cout << "+--------------------------------------+\n";
+	}
+	else if (money <= 0) {
 		std::cout << "\n+--------------------------------------+\n";
 		std::cout << "|             !GAME OVER!              |\n";
 		std::cout << "|     You ran out of money and died    |\n";
@@ -278,13 +285,6 @@ void gameEnd(const int money, const int psyche, const int examsTaken)
 		std::cout << "|             !GAME OVER!              |\n";
 		std::cout << "|    Your psyche couldn't handle it    |\n";
 		std::cout << "|    and you left the university!      |\n";
-		std::cout << "+--------------------------------------+\n";
-	}
-	else if (examsTaken == 5) {
-		std::cout << "\n+--------------------------------------+\n";
-		std::cout << "|          !CONGRATULATIONS!           |\n";
-		std::cout << "|      You took all the exams and      |\n";
-		std::cout << "|  survived the session of your life!  |\n";
 		std::cout << "+--------------------------------------+\n";
 	}
 	else {
@@ -611,10 +611,14 @@ int main()
 				else std::cout << "Invalid command!\n";
 
 			}
-			if (money <= 0 || psyche <= 0)
+			if (psyche <= 0)
+			{
+				psyche = 0;
+				gameOver = 1;
+			}
+			if (money <= 0)
 			{
 				money = 0;
-				psyche = 0;
 				gameOver = 1;
 			}
 			if (energy < 0)

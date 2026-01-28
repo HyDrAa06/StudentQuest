@@ -18,7 +18,6 @@ bool isDigit(char ch)
 
 bool isValidNumber(const char* str)
 {
-    while (*str)
 	if (!str || !*str)
 		return false;
 
